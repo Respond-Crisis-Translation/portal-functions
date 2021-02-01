@@ -42,9 +42,7 @@ export const sendInvitationEmail = functions.firestore
 
           admin
             .auth()
-            .generatePasswordResetLink(userRecord.email, {
-              url: "https://rct-portal.web.app/",
-            })
+            .generatePasswordResetLink(userRecord.email)
             .then((link: string) => {
               // Construct password reset email template, embed the link and send
               // using custom SMTP server.
@@ -64,13 +62,23 @@ export const sendInvitationEmail = functions.firestore
   });
 
 function sendEmail(user: UserRecord, link: string) {
+  const htmlBody = `<p>Hello ${user.displayName},</p>
+  <p>Thank you so much for your interest of becoming a part of the translators network,
+  and congratulations! You are now a part of our volunteer program.</p>
+  <p>Please proceed to create your login information <a href='${link}'>here</a> where you can join
+  the community of translators who are just like you,
+  eager to help the asylum seekers by translating their documents.</p>
+  <p>Thank you again for your time.</p>
+  <p>If you didn’t ask to reset your password, you can ignore this email.</p>
+  <p>Best,</p>
+  <p>Respond: Crisis Translators Network Team</p>`;
+
   const emailSubject = "Welcome to the Respond: Crisis Translators Network!";
-  const emailBody = `Hello ${user.displayName}, Please proceed to create your login information by clicking ${link}. Thank you`;
   const mailOptions = {
     from: "Respond: Crisis Translators Network <respond@crisistranslators.net>",
     to: user.email,
     subject: emailSubject,
-    text: emailBody,
+    html: htmlBody,
   };
 
   transporter.sendMail(mailOptions, function (error: any, info: any) {
@@ -83,8 +91,9 @@ function sendEmail(user: UserRecord, link: string) {
 }
 
 function randomString(len: number) {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    var r = (Math.random() * 16) | 0,
+      v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(len);
   });
 }
