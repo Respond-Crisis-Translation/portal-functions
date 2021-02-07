@@ -9,8 +9,8 @@ admin.initializeApp(functions.config().firebase);
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "",
-    pass: "",
+    user: functions.config().rct.email,
+    pass: functions.config().rct.password,
   },
 });
 
@@ -33,13 +33,12 @@ export const sendInvitationEmail = functions.firestore
           email: translatorEmail,
           password: randomString(10),
           emailVerified: true,
-          displayName: after.first_name,
+          displayName: `${after.first_name} ${after.last_name}`,
           disabled: false,
         })
         .then((userRecord: UserRecord) => {
           // See the UserRecord reference doc for the contents of userRecord.
           console.log("Successfully created new user:", userRecord.uid);
-
           admin
             .auth()
             .generatePasswordResetLink(userRecord.email)
@@ -92,7 +91,7 @@ function sendEmail(user: UserRecord, link: string) {
 
 function randomString(len: number) {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-    var r = (Math.random() * 16) | 0,
+    const r = (Math.random() * 16) | 0,
       v = c === "x" ? r : (r & 0x3) | 0x8;
     return v.toString(len);
   });
