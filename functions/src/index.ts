@@ -74,7 +74,7 @@ function sendEmail(user: UserRecord, link: string) {
 
   const emailSubject = "Welcome to the Respond: Crisis Translators Network!";
   const mailOptions = {
-    from: "Respond: Crisis Translators Network <respond@crisistranslators.net>",
+    from: `Respond Crisis Translators Network <${functions.config().rct.email}>`,
     to: user.email,
     subject: emailSubject,
     html: htmlBody,
