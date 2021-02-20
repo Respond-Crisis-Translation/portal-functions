@@ -57,6 +57,21 @@ export const sendInvitationEmail = functions.firestore
           console.log("Error creating new user: ", error);
         });
     }
+
+    if (before.role != after.role && !!after.role) {
+      const uid = context.params.id;
+      admin
+        .auth()
+        .setCustomUserClaims(uid, { role: after.role })
+        .then(
+          () => {
+            console.log(`Successfully set ${after.role} role for ${uid}`);
+          },
+          (err: any) => {
+            console.log(`Error while setting ${after.role} role for ${uid}`, err);
+          }
+        );
+    }
     return new Promise((res: any, err: any) => true);
   });
 
@@ -74,7 +89,9 @@ function sendEmail(user: UserRecord, link: string) {
 
   const emailSubject = "Welcome to the Respond: Crisis Translators Network!";
   const mailOptions = {
-    from: `Respond Crisis Translators Network <${functions.config().rct.email}>`,
+    from: `Respond Crisis Translators Network <${
+      functions.config().rct.email
+    }>`,
     to: user.email,
     subject: emailSubject,
     html: htmlBody,
